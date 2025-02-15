@@ -1,3 +1,4 @@
+import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import booksRouter from "./route/books";
@@ -37,5 +38,6 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions)); // CORS 미들웨어 추가
+app.use(bodyParser.json());
 
 app.use("/api/books", booksRouter); // 책 라우트
