@@ -7,6 +7,7 @@ interface Book {
   title: string;
   author: string;
   price: number;
+  ea: number;
 }
 
 interface Message {
@@ -35,10 +36,7 @@ export const getListHandler: Handler<Book[] | Message> = async (req, res) => {
 };
 
 // 책 상세 정보 조회 Handler
-export const getDetailHandler: Handler<Book | Message> = async (
-  req: Request,
-  res
-) => {
+export const getDetailHandler: Handler<Book | Message> = async (req, res) => {
   try {
     const { id } = req.params;
     const [rows] = await pool.query("SELECT * FROM books WHERE id = ?", [id]);
@@ -56,18 +54,38 @@ export const getDetailHandler: Handler<Book | Message> = async (
 
 // 책 추가 Handler
 export const postAddHandler: Handler<Book | Message> = async (req, res) => {
-  const { title, author, price } = req.body;
+  const { title, author, price, ea } = req.body;
   try {
     const result = await pool.query(
-      "INSERT INTO books (title, author, price) VALUES (?, ?, ?)",
-      [title, author, price]
+      "INSERT INTO books (title, author, price, ea) VALUES (?, ?, ?, ?)",
+      [title, author, price, ea]
     );
 
-    if (title && author && price) {
-      res.status(400).json({ message: "값이 누락되었습니다." });
+    if (
+      !title ||
+      !author ||
+      typeof price !== "number" ||
+      typeof ea !== "number"
+    ) {
+      return res
+        .status(400)
+        .json({ message: "모든 필드를 정확하게 입력해주세요." });
     }
 
-    res.status(201).json({ message: `${title} 책 추가 완료` });
+    if ("insertId" in result[0]) {
+      const insertedId = result[0].insertId;
+
+      res.status(201).json({
+        message: `${title} 책이 성공적으로 추가되었습니다. ID: ${insertedId}`,
+      });
+    } else {
+      // 예상치 못한 결과 처리
+      console.error("Unexpected result:", result);
+
+      res
+        .status(500)
+        .json({ message: "책을 추가하는 중 예상치 못한 오류가 발생했습니다." });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "서버 오류" });
@@ -77,11 +95,11 @@ export const postAddHandler: Handler<Book | Message> = async (req, res) => {
 // 책 정보 수정 Handler
 export const putAddHandler: Handler<Book | Message> = async (req, res) => {
   const { id } = req.params;
-  const { title, author, price } = req.body;
+  const { title, author, price, ea } = req.body;
   try {
     const result = await pool.query(
-      "UPDATE books SET title = ?, author = ?, price = ? WHERE id = ?",
-      [title, author, price, id]
+      "UPDATE books SET title = ?, author = ?, price = ?, ea = ? WHERE id = ?",
+      [title, author, price, ea, id]
     );
 
     if ((result as any).affectedRows === 0) {
