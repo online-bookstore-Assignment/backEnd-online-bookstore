@@ -1,17 +1,29 @@
 import express, { Request, Response } from "express";
+import pool from "./db";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 8080;
 
-// 미들웨어 설정 (JSON 파싱)
+// 미들웨어 설정
 app.use(express.json());
 
-// 기본 라우트
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, TypeScript Express Server!");
+// 책 목록 조회 API
+app.get("/api/books", async (req: Request, res: Response) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM books");
+    console.log(rows);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error retrieving books");
+  }
 });
 
 // 서버 시작
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`
+  ################################################
+        🛡️  Server listening on port: ${PORT}🛡️
+  ################################################
+  `);
 });
