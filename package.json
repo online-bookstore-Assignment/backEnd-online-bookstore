@@ -4,8 +4,8 @@
   "main": "app.ts",
   "license": "MIT",
   "scripts": {
-    "start": "pm2 start dist/src/app.ts",
-    "delete": "pm2 delete dist/src/app.ts ",
+    "start": "pm2 start dist/src/app.js",
+    "delete": "pm2 delete dist/src/app.js ",
     "list": "pm2 list ",
     "build": "tsc -p .",
     "dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/app.ts"
